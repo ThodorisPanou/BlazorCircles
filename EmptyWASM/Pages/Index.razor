@@ -1,0 +1,63 @@
+﻿@using Microsoft.AspNetCore.Components.Web;
+
+@page "/"
+
+
+<div class="MainDiv" @onclick="DrawCircle">
+
+    <button class="undo" @onclick="Undo" disabled="@UndoDisabled">Undo</button>
+    <button class="redo" @onclick="Redo" disabled="@RedoDisabled">Redo</button>
+
+    @foreach(var item in items)
+    {
+        <div class="child" style=@item.Style/>
+    }
+
+</div>
+
+@code{
+    Stack<CustomObject> items = new Stack<CustomObject>();
+    Stack<CustomObject> removed_items = new Stack<CustomObject>();
+    public bool UndoDisabled = true;
+    public bool RedoDisabled = true;
+    Random random = new Random();
+    static int index = 1;
+
+    private void DrawCircle(MouseEventArgs e)
+    {
+        if (e.ClientX < 125 && e.ClientY < 45) { }
+        else
+        {
+            items.Push(new CustomObject(e.ClientY - 25, e.ClientX - 25, index++));
+            UndoDisabled = false;
+            StateHasChanged();
+        }
+    }
+
+    private void Undo()
+    {
+        if (items.Count > 0)
+        {
+            removed_items.Push(items.Pop());
+            RedoDisabled = false;
+            if (items.Count == 0)
+                UndoDisabled = true;
+        }
+        else
+        {
+            UndoDisabled = true;
+        }
+    }
+
+    private void Redo()
+    {
+        if (removed_items.Count>0){
+            items.Push(removed_items.Pop());
+            UndoDisabled = false;
+        }
+        else
+        {
+            RedoDisabled = true;
+        }
+    }
+}
